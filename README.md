@@ -21,8 +21,8 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 5. Locate the exit to the next level - go to 1.
 
 ### Minimum Viable Product
-- [] Create a basic dungeon map.
-- [] Place the player and let them walk around.
+- [x] Create a basic dungeon map.
+- [x] Place the player and let them walk around.
 - [] Spawn monsters, draw them, and let the player kill them by walking into them.
 - [] Add health and a combat system that uses it.
 - [] Add healing potions.
