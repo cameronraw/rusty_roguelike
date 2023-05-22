@@ -3,6 +3,8 @@
 
 I'm keeping track of progress through the book in this repo, hoping to finish with a fully functional game built in Rust.
 
+Just about to start Chapter 6
+
 Below is the Short Game Design Document recommended by the book:
 
 ## Short Game Design Document for Rusty Roguelike
@@ -23,19 +25,19 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 ### Minimum Viable Product
 - [x] Create a basic dungeon map.
 - [x] Place the player and let them walk around.
-- [] Spawn monsters, draw them, and let the player kill them by walking into them.
-- [] Add health and a combat system that uses it.
-- [] Add healing potions.
-- [] Display a "game over" screen when the player dies.
-- [] Add the Amulet of Yala to the level and let the player win by reaching it.
+- [ ] Spawn monsters, draw them, and let the player kill them by walking into them.
+- [ ] Add health and a combat system that uses it.
+- [ ] Add healing potions.
+- [ ] Display a "game over" screen when the player dies.
+- [ ] Add the Amulet of Yala to the level and let the player win by reaching it.
 
 ### Stretch Goals
-- [] Add Fields-of-View.
-- [] Add more interesting dungeon designs.
-- [] Add some dungeon themes.
-- [] Ad multiple layers to the dungeon, the the Amulet on the last one.
-- [] Add varied weapons to the game.
-- [] Move to a data-driven design for spawning enemies.
-- [] Consider some visual effects to make the combat more visceral.
-- [] Consider keeping score.
+- [ ] Add Fields-of-View.
+- [ ] Add more interesting dungeon designs.
+- [ ] Add some dungeon themes.
+- [ ] Ad multiple layers to the dungeon, the the Amulet on the last one.
+- [ ] Add varied weapons to the game.
+- [ ] Move to a data-driven design for spawning enemies.
+- [ ] Consider some visual effects to make the combat more visceral.
+- [ ] Consider keeping score.
 
