@@ -28,14 +28,14 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 - [x] Spawn monsters, draw them, and let the player kill them by walking into them.
 - [x] Add health and a combat system that uses it.
 - [x] Add healing potions.
-- [ ] Display a "game over" screen when the player dies.
+- [x] Display a "game over" screen when the player dies.
 - [ ] Add the Amulet of Yala to the level and let the player win by reaching it.
 
 ### Stretch Goals
 - [ ] Add Fields-of-View.
 - [ ] Add more interesting dungeon designs.
 - [ ] Add some dungeon themes.
-- [ ] Ad multiple layers to the dungeon, the the Amulet on the last one.
+- [ ] Add multiple layers to the dungeon, the Amulet on the last one.
 - [ ] Add varied weapons to the game.
 - [ ] Move to a data-driven design for spawning enemies.
 - [ ] Consider some visual effects to make the combat more visceral.
