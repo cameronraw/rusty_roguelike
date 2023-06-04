@@ -29,7 +29,7 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 - [x] Add health and a combat system that uses it.
 - [x] Add healing potions.
 - [x] Display a "game over" screen when the player dies.
-- [ ] Add the Amulet of Yala to the level and let the player win by reaching it.
+- [x] Add the Amulet of Yala to the level and let the player win by reaching it.
 
 ### Stretch Goals
 - [ ] Add Fields-of-View.

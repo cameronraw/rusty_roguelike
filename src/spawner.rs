@@ -6,7 +6,7 @@ use legion::World;
 
 use crate::{
     components::{Player, Render},
-    prelude::{ChasingPlayer, Enemy, Health, Name},
+    prelude::{AmuletOfYala, ChasingPlayer, Enemy, Health, Item, Name},
 };
 
 pub fn spawn_player(ecs: &mut World, pos: Point) {
@@ -51,4 +51,17 @@ fn goblin() -> (i32, String, FontCharType) {
 
 fn orc() -> (i32, String, FontCharType) {
     (2, "Orc".to_string(), to_cp437('o'))
+}
+
+pub fn spawn_amulet_of_yala(ecs: &mut World, position: Point) {
+    ecs.push((
+        Item,
+        AmuletOfYala,
+        position,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: to_cp437('|'),
+        },
+        Name("Amulet of Yala".to_string()),
+    ));
 }
