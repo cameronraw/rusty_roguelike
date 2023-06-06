@@ -3,8 +3,6 @@
 
 I'm keeping track of progress through the book in this repo, hoping to finish with a fully functional game built in Rust.
 
-Just about to start Chapter 6
-
 Below is the Short Game Design Document recommended by the book:
 
 ## Short Game Design Document for Rusty Roguelike
@@ -32,7 +30,7 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 - [x] Add the Amulet of Yala to the level and let the player win by reaching it.
 
 ### Stretch Goals
-- [ ] Add Fields-of-View.
+- [x] Add Fields-of-View.
 - [ ] Add more interesting dungeon designs.
 - [ ] Add some dungeon themes.
 - [ ] Add multiple layers to the dungeon, the Amulet on the last one.
