@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
-const FORTRESS: (&str, i32, i32) = ("
+const FORTRESS: (&str, i32, i32) = (
+    "
 ------------
 ---######---
 ---#----#---
@@ -12,7 +13,10 @@ const FORTRESS: (&str, i32, i32) = ("
 ---#----#---
 ---######---
 ------------
-", 12, 11);
+",
+    12,
+    11,
+);
 
 pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     let mut placement = None;
@@ -22,17 +26,17 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         SCREEN_HEIGHT,
         &vec![mb.map.point2d_to_index(mb.player_start)],
         &mb.map,
-        1024.0
+        1024.0,
     );
 
     let mut attempts = 0;
 
     while placement.is_none() && attempts < 10 {
         let dimensions = Rect::with_size(
-            rng.range(0, SCREEN_WIDTH - FORTRESS.1), 
-            rng.range(0, SCREEN_HEIGHT - FORTRESS.2), 
-            FORTRESS.1, 
-            FORTRESS.2
+            rng.range(0, SCREEN_WIDTH - FORTRESS.1),
+            rng.range(0, SCREEN_HEIGHT - FORTRESS.2),
+            FORTRESS.1,
+            FORTRESS.2,
         );
 
         let mut can_place = false;
@@ -53,26 +57,28 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     }
 
     if let Some(placement) = placement {
-        let string_vec: Vec<char> = FORTRESS.0
-            .chars().filter(|a| *a != '\r' && *a != '\n')
+        let string_vec: Vec<char> = FORTRESS
+            .0
+            .chars()
+            .filter(|a| *a != '\r' && *a != '\n')
             .collect();
 
         let mut i = 0;
-        for ty in placement.y .. placement.y + FORTRESS.2 {
-            for tx in placement.x .. placement.x + FORTRESS.1 {
+        for ty in placement.y..placement.y + FORTRESS.2 {
+            for tx in placement.x..placement.x + FORTRESS.1 {
                 let idx = map_idx(tx, ty);
                 let c = string_vec[i];
                 match c {
                     'M' => {
                         mb.map.tiles[idx] = TileType::Floor;
                         mb.monster_spawns.push(Point::new(tx, ty));
-                    },
+                    }
                     '-' => {
                         mb.map.tiles[idx] = TileType::Floor;
-                    },
+                    }
                     '#' => {
                         mb.map.tiles[idx] = TileType::Wall;
-                    },
+                    }
                     _ => {
                         println!("No rendering instruction for [{}]", c)
                     }
@@ -81,5 +87,4 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
             }
         }
     }
-
 }

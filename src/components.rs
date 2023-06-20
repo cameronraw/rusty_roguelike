@@ -52,7 +52,7 @@ pub struct AmuletOfYala;
 pub struct FieldOfView {
     pub visible_tiles: HashSet<Point>,
     pub radius: i32,
-    pub is_dirty: bool
+    pub is_dirty: bool,
 }
 
 impl FieldOfView {
@@ -60,7 +60,7 @@ impl FieldOfView {
         Self {
             visible_tiles: HashSet::new(),
             radius,
-            is_dirty: true
+            is_dirty: true,
         }
     }
 
@@ -68,7 +68,7 @@ impl FieldOfView {
         Self {
             visible_tiles: HashSet::new(),
             radius: self.radius,
-            is_dirty: true
+            is_dirty: true,
         }
     }
 }

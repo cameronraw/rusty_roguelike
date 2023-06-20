@@ -1,12 +1,19 @@
-mod empty;
-mod rooms;
 mod automata;
 mod drunkard;
+mod empty;
 mod prefab;
+mod rooms;
+mod themes;
 
 use crate::prelude::*;
 
-use self::{automata::CellularAutomataArchitect, drunkard::DrunkardsWalkArchitect, rooms::RoomsArchitect, prefab::apply_prefab};
+use self::{
+    automata::CellularAutomataArchitect,
+    drunkard::DrunkardsWalkArchitect,
+    prefab::apply_prefab,
+    rooms::RoomsArchitect,
+    themes::{DungeonTheme, ForestTheme},
+};
 
 const NUM_ROOMS: usize = 20;
 
@@ -20,17 +27,22 @@ pub struct MapBuilder {
     pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
+    pub theme: Box<dyn MapTheme>,
 }
 
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => Box::new(DrunkardsWalkArchitect{}),
-            1 => Box::new(RoomsArchitect{}),
-            _ => Box::new(CellularAutomataArchitect{})
+            0 => Box::new(DrunkardsWalkArchitect {}),
+            1 => Box::new(RoomsArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {}),
         };
         let mut mb = architect.new(rng);
         apply_prefab(&mut mb, rng);
+        mb.theme = match rng.range(0, 2) {
+            0 => DungeonTheme::new(),
+            _ => ForestTheme::new(),
+        };
         mb
     }
     fn fill(&mut self, tile: TileType) {
@@ -43,18 +55,20 @@ impl MapBuilder {
             SCREEN_HEIGHT,
             &vec![self.map.point2d_to_index(self.player_start)],
             &self.map,
-            1024.0
+            1024.0,
         );
 
         const UNREACHABLE: &f32 = &f32::MAX;
 
         self.map.index_to_point2d(
-            dijkstra_map.map
+            dijkstra_map
+                .map
                 .iter()
                 .enumerate()
                 .filter(|(_, dist)| *dist < UNREACHABLE)
-                .max_by(|a,b| a.1.partial_cmp(b.1).unwrap())
-                .unwrap().0
+                .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+                .unwrap()
+                .0,
         )
     }
 
@@ -102,7 +116,6 @@ impl MapBuilder {
         }
     }
 
-    
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
         use std::cmp::{max, min};
         for y in min(y1, y2)..=max(y1, y2) {
@@ -123,23 +136,29 @@ impl MapBuilder {
 
     fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
         const NUM_MONSTERS: usize = 50;
-        let mut spawnable_tiles: Vec<Point> = self.map.tiles
+        let mut spawnable_tiles: Vec<Point> = self
+            .map
+            .tiles
             .iter()
             .enumerate()
-            .filter(|(idx, t)|
-                **t == TileType::Floor && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*idx)) > 10.0
-            )
+            .filter(|(idx, t)| {
+                **t == TileType::Floor
+                    && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*idx))
+                        > 10.0
+            })
             .map(|(idx, _)| self.map.index_to_point2d(idx))
             .collect();
 
         let mut spawns = Vec::new();
-        for _ in 0 .. NUM_MONSTERS {
-            let target_index = rng.random_slice_index(&spawnable_tiles)
-                .unwrap();
+        for _ in 0..NUM_MONSTERS {
+            let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
             spawns.push(spawnable_tiles[target_index].clone());
             spawnable_tiles.remove(target_index);
         }
         spawns
-        
     }
+}
+
+pub trait MapTheme: Sync + Send {
+    fn tile_to_render(&self, tile_type: TileType) -> FontCharType;
 }
