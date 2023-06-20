@@ -31,7 +31,7 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 
 ### Stretch Goals
 - [x] Add Fields-of-View.
-- [ ] Add more interesting dungeon designs.
+- [x] Add more interesting dungeon designs.
 - [ ] Add some dungeon themes.
 - [ ] Add multiple layers to the dungeon, the Amulet on the last one.
 - [ ] Add varied weapons to the game.

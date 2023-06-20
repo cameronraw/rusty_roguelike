@@ -2,10 +2,11 @@ mod empty;
 mod rooms;
 mod automata;
 mod drunkard;
+mod prefab;
 
 use crate::prelude::*;
 
-use self::{automata::CellularAutomataArchitect, drunkard::DrunkardsWalkArchitect, rooms::RoomsArchitect};
+use self::{automata::CellularAutomataArchitect, drunkard::DrunkardsWalkArchitect, rooms::RoomsArchitect, prefab::apply_prefab};
 
 const NUM_ROOMS: usize = 20;
 
@@ -28,7 +29,9 @@ impl MapBuilder {
             1 => Box::new(RoomsArchitect{}),
             _ => Box::new(CellularAutomataArchitect{})
         };
-        architect.new(rng)
+        let mut mb = architect.new(rng);
+        apply_prefab(&mut mb, rng);
+        mb
     }
     fn fill(&mut self, tile: TileType) {
         self.map.tiles.iter_mut().for_each(|t| *t = tile);
