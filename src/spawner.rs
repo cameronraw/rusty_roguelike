@@ -6,7 +6,10 @@ use legion::World;
 
 use crate::{
     components::{Player, Render},
-    prelude::{AmuletOfYala, ChasingPlayer, Enemy, FieldOfView, Health, Item, Name, ProvidesHealing, ProvidesDungeonMap},
+    prelude::{
+        AmuletOfYala, ChasingPlayer, Enemy, FieldOfView, Health, Item, Name, ProvidesDungeonMap,
+        ProvidesHealing,
+    },
 };
 
 pub fn spawn_player(ecs: &mut World, pos: Point) {
@@ -30,7 +33,7 @@ pub fn spawn_entity(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Point
     match roll {
         1 => spawn_healing_potion(ecs, pos),
         2 => spawn_magic_mapper(ecs, pos),
-        _ => spawn_monster(ecs, rng, pos)
+        _ => spawn_monster(ecs, rng, pos),
     }
 }
 
@@ -78,28 +81,27 @@ pub fn spawn_amulet_of_yala(ecs: &mut World, position: Point) {
 }
 
 pub fn spawn_healing_potion(ecs: &mut World, pos: Point) {
-    ecs.push(
-        (Item, 
-            pos, 
-            Render {
-                color: ColorPair::new(WHITE, BLACK),
-                glyph: to_cp437('!')
-            },
-            Name("Healing Potion".to_string()),
-            ProvidesHealing { amount: 6 }
-        ));
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: to_cp437('!'),
+        },
+        Name("Healing Potion".to_string()),
+        ProvidesHealing { amount: 6 },
+    ));
 }
 
 pub fn spawn_magic_mapper(ecs: &mut World, pos: Point) {
-    ecs.push(
-        (Item, 
-            pos, 
-            Render {
-                color: ColorPair::new(WHITE, BLACK),
-                glyph: to_cp437('{')
-            },
-            Name("Dungeon Map".to_string()),
-            ProvidesDungeonMap {}
-        ));
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: to_cp437('{'),
+        },
+        Name("Dungeon Map".to_string()),
+        ProvidesDungeonMap {},
+    ));
 }
-
