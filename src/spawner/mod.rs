@@ -2,7 +2,7 @@ mod template;
 
 use crate::{
     components::{Player, Render},
-    prelude::{AmuletOfYala, FieldOfView, Health, Item, Name},
+    prelude::{AmuletOfYala, FieldOfView, Health, Item, Name, Damage},
 };
 use bracket_lib::{
     random::RandomNumberGenerator,
@@ -35,6 +35,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
             max: 10,
         },
         FieldOfView::new(8),
+        Damage(1)
     ));
 }
 
