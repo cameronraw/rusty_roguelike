@@ -24,7 +24,7 @@ mod prelude {
 }
 
 use prelude::*;
-use spawner::{spawn_amulet_of_yala, spawn_monster};
+use spawner::{spawn_amulet_of_yala, spawn_entity};
 
 struct State {
     ecs: World,
@@ -45,7 +45,7 @@ impl State {
         map_builder
             .monster_spawns
             .iter()
-            .for_each(|pos| spawn_monster(&mut ecs, &mut rng, *pos));
+            .for_each(|pos| spawn_entity(&mut ecs, &mut rng, *pos));
         resources.insert(map_builder.map);
         resources.insert(Camera::new(map_builder.player_start));
         resources.insert(TurnState::AwaitingInput);
@@ -121,7 +121,7 @@ impl State {
             .iter()
             .skip(1)
             .map(|r| r.center())
-            .for_each(|pos| spawn_monster(&mut self.ecs, &mut rng, pos));
+            .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, pos));
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));
         self.resources.insert(TurnState::AwaitingInput);
