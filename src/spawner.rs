@@ -14,9 +14,7 @@ use crate::{
 
 pub fn spawn_player(ecs: &mut World, pos: Point) {
     ecs.push((
-        Player {
-            map_level: 0
-        },
+        Player { map_level: 0 },
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
