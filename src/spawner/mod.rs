@@ -8,7 +8,7 @@ use bracket_lib::{
     random::RandomNumberGenerator,
     terminal::{to_cp437, ColorPair, Point, BLACK, WHITE},
 };
-use legion::World;
+use legion::{World, systems::CommandBuffer};
 
 use self::template::{FileEntityLoader, Spawner, TemplateSpawner};
 
@@ -21,7 +21,8 @@ pub fn spawn_level(
     let spawner = Spawner::default();
     let file_reader = FileEntityLoader::new(String::from("resources/template.ron"));
     let template = TemplateSpawner::new(&file_reader, spawner);
-    template.spawn_entities(ecs, rng, level, spawn_points);
+    let commands = CommandBuffer::new(ecs);
+    template.spawn_entities(ecs, rng, level, spawn_points, commands);
 }
 
 pub fn spawn_player(ecs: &mut World, pos: Point) {
