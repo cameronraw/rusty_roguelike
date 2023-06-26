@@ -1,14 +1,8 @@
-use bracket_lib::random::RandomNumberGenerator;
-use bracket_lib::terminal::Point;
-use legion::systems::CommandBuffer;
-use legion::World;
-use mockall::*;
 use ron::de::from_reader;
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fs::File;
-
-use crate::prelude::*;
+use mockall::*;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Template {
@@ -22,37 +16,14 @@ pub struct Template {
     pub base_damage: Option<i32>,
 }
 
-#[automock]
-pub trait CanLoadEntities {
-    fn load_entities(&self) -> Vec<Template>;
-}
-
-pub struct FileEntityLoader {
-    file_path: String,
-}
-
-impl FileEntityLoader {
-    pub fn new(file_path: String) -> Self {
-        FileEntityLoader { file_path }
-    }
-}
-
-impl CanLoadEntities for FileEntityLoader {
-    fn load_entities(&self) -> Vec<Template> {
-        let file = File::open(&self.file_path).expect("Failed to open file");
-        let template_collection: TemplateCollection = from_reader(file).expect("Unable to load templates");
-        template_collection.entities
-    }
+#[derive(Clone, Deserialize, Debug, PartialEq)]
+pub enum EntityType {
+    Enemy,
+    Item,
 }
 
 #[derive(Clone, Deserialize, Debug)]
-struct TemplateCollection {
-    pub entities: Vec<Template>
-}
-
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct TemplateSpawner<T>
+pub struct Templates<T>
 where
     T: CanSpawnEntities,
 {
@@ -61,13 +32,7 @@ where
     pub spawner: T,
 }
 
-#[derive(Clone, Deserialize, Debug, PartialEq)]
-pub enum EntityType {
-    Enemy,
-    Item,
-}
-
-impl<T: CanSpawnEntities + Default> Default for TemplateSpawner<T> {
+impl<T: CanSpawnEntities + Default> Default for Templates<T> {
     fn default() -> Self {
         Self {
             entities: Default::default(),
@@ -79,6 +44,8 @@ impl<T: CanSpawnEntities + Default> Default for TemplateSpawner<T> {
 #[derive(Default)]
 pub struct Spawner {}
 
+impl Spawner {}
+
 #[automock]
 pub trait CanSpawnEntities {
     fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer);
@@ -86,11 +53,20 @@ pub trait CanSpawnEntities {
 
 #[automock]
 pub trait CanReadEntitiesFromFile {
-    fn read_entities<T: CanSpawnEntities + Default + 'static>(&self) -> TemplateSpawner<T>;
+    fn read_entities<T: CanSpawnEntities + Default + 'static>(&self) -> Templates<T>;
 }
 
 #[derive(Default)]
 pub struct FileReader {}
+
+impl CanReadEntitiesFromFile for FileReader {
+    fn read_entities<T>(&self) -> Vec<Template> where 
+        T: CanSpawnEntities + Default + 'static, 
+    {
+        let file = File::open("resources/template.ron").expect("Failed opening file");
+        from_reader(file).expect("Unable to load templates")
+    }
+}
 
 impl CanSpawnEntities for Spawner {
     fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer) {
@@ -139,13 +115,11 @@ impl CanSpawnEntities for Spawner {
     }
 }
 
-impl<T> TemplateSpawner<T>
-where
-    T: CanSpawnEntities + Default + 'static,
-{
-    pub fn new(loader: &dyn CanLoadEntities, spawner: T) -> Self {
-        let entities = loader.load_entities();
-        TemplateSpawner { entities, spawner }
+impl<T> Templates<T> 
+    where T: CanSpawnEntities + Default {
+    pub fn load<F: CanReadEntitiesFromFile>(spawner: T, file_reader: F) -> Self {
+        let entities = file_reader.read_entities::<Vec<Template>>();
+        Templates { entities, spawner }
     }
 
     pub fn spawn_entities(
@@ -176,61 +150,13 @@ where
 
 #[cfg(test)]
 pub mod test {
-
     use super::*;
 
     #[test]
     fn should_spawn_the_correct_entities() {
         let mut mock_spawner = MockCanSpawnEntities::new();
-        let mut mock_loader = MockCanLoadEntities::new();
-        let entities: Vec<Template> = vec![
-            Template {
-                entity_type: EntityType::Item,
-                levels: HashSet::from([0, 1, 2]),
-                frequency: 5,
-                name: String::from("Test Potion"),
-                glyph: '/',
-                provides: Some(Vec::<(String, i32)>::from([(
-                    String::from("ProvidesHealing"),
-                    5,
-                )])),
-                hp: None,
-                base_damage: None,
-            },
-            Template {
-                entity_type: EntityType::Item,
-                levels: HashSet::from([0, 1, 2]),
-                frequency: 5,
-                name: String::from("Test Potion"),
-                glyph: '/',
-                provides: Some(Vec::<(String, i32)>::from([(
-                    String::from("ProvidesHealing"),
-                    5,
-                )])),
-                hp: None,
-                base_damage: None,
-            },
-            Template {
-                entity_type: EntityType::Item,
-                levels: HashSet::from([0, 1, 2]),
-                frequency: 5,
-                name: String::from("Test Potion"),
-                glyph: '/',
-                provides: Some(Vec::<(String, i32)>::from([(
-                    String::from("ProvidesHealing"),
-                    5,
-                )])),
-                hp: None,
-                base_damage: None,
-            },
-        ];
-        mock_loader.expect_load_entities().returning(move || entities.clone());
-        mock_spawner.expect_spawn_entity().with(predicate::always(), predicate::always(), predicate::always())
-            .returning(|_, _, _| ())
-            .times(3);
-        let templates = TemplateSpawner::new(&mock_loader, mock_spawner);
-        let mut world = World::default();
-        let mut rng = RandomNumberGenerator::new();
-        templates.spawn_entities(&mut world, &mut rng, 0, &[Point::new(1, 1), Point::new(2,2), Point::new(3,3)]);
+        mock_spawner
+            .expect_spawn_entity()
+            .times(1);
     }
 }

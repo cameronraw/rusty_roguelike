@@ -1,4 +1,4 @@
-Templates(
+TemplateCollection(
   entities : [
     Template(
       entity_type: Item,

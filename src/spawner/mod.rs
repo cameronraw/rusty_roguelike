@@ -10,7 +10,7 @@ use bracket_lib::{
 };
 use legion::World;
 
-use self::template::{Spawner, Templates};
+use self::template::{FileEntityLoader, Spawner, TemplateSpawner};
 
 pub fn spawn_level(
     ecs: &mut World,
@@ -19,7 +19,8 @@ pub fn spawn_level(
     spawn_points: &[Point],
 ) {
     let spawner = Spawner::default();
-    let template = Templates::load(spawner);
+    let file_reader = FileEntityLoader::new(String::from("resources/template.ron"));
+    let template = TemplateSpawner::new(&file_reader, spawner);
     template.spawn_entities(ecs, rng, level, spawn_points);
 }
 
