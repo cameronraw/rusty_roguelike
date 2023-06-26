@@ -4,11 +4,11 @@ use crate::prelude::*;
 pub struct CellularAutomataArchitect {}
 
 impl MapArchitect for CellularAutomataArchitect {
-    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
+    fn create_map_builder(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         let mut mb = MapBuilder {
             map: Map::new(),
             rooms: Vec::new(),
-            monster_spawns: Vec::new(),
+            spawn_locations: Vec::new(),
             player_start: Point::zero(),
             amulet_start: Point::zero(),
             theme: DungeonTheme::new(),
@@ -18,7 +18,7 @@ impl MapArchitect for CellularAutomataArchitect {
             self.iteration(&mut mb.map);
         }
         let start = self.find_start(&mb.map);
-        mb.monster_spawns = mb.spawn_monsters(&start, rng);
+        mb.spawn_locations = mb.get_spawn_plan(&start, rng);
         mb.player_start = start;
         mb.amulet_start = mb.find_most_distant();
         mb

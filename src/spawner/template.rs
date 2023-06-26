@@ -1,5 +1,4 @@
 use bracket_lib::random::RandomNumberGenerator;
-use bracket_lib::terminal::Point;
 use legion::systems::CommandBuffer;
 use legion::World;
 use mockall::*;
@@ -40,16 +39,16 @@ impl FileEntityLoader {
 impl CanLoadEntities for FileEntityLoader {
     fn load_entities(&self) -> Vec<Template> {
         let file = File::open(&self.file_path).expect("Failed to open file");
-        let template_collection: TemplateCollection = from_reader(file).expect("Unable to load templates");
+        let template_collection: TemplateCollection =
+            from_reader(file).expect("Unable to load templates");
         template_collection.entities
     }
 }
 
 #[derive(Clone, Deserialize, Debug)]
 struct TemplateCollection {
-    pub entities: Vec<Template>
+    pub entities: Vec<Template>,
 }
-
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct TemplateSpawner<T>
@@ -61,7 +60,7 @@ where
     pub spawner: T,
 }
 
-#[derive(Clone, Deserialize, Debug, PartialEq)]
+#[derive(Copy, Clone, Deserialize, Debug, PartialEq)]
 pub enum EntityType {
     Enemy,
     Item,
@@ -81,7 +80,7 @@ pub struct Spawner {}
 
 #[automock]
 pub trait CanSpawnEntities {
-    fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer);
+    fn spawn_entity(&self, pt: &SpawnLocation, template: &Template, commands: &mut CommandBuffer);
 }
 
 #[automock]
@@ -93,9 +92,9 @@ pub trait CanReadEntitiesFromFile {
 pub struct FileReader {}
 
 impl CanSpawnEntities for Spawner {
-    fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer) {
+    fn spawn_entity(&self, pt: &SpawnLocation, template: &Template, commands: &mut CommandBuffer) {
         let entity = commands.push((
-            pt.clone(),
+            pt.point,
             Render {
                 color: ColorPair::new(WHITE, BLACK),
                 glyph: to_cp437(template.glyph),
@@ -153,7 +152,7 @@ where
         ecs: &mut World,
         rng: &mut RandomNumberGenerator,
         level: usize,
-        spawn_points: &[Point],
+        spawn_locations: &[SpawnLocation],
     ) {
         let mut available_entities = Vec::new();
         self.entities
@@ -165,11 +164,26 @@ where
                 }
             });
         let mut commands = CommandBuffer::new(ecs);
-        spawn_points.iter().for_each(|pt| {
-            if let Some(entity) = rng.random_slice_entry(&available_entities) {
-                self.spawner.spawn_entity(pt, entity, &mut commands);
-            }
-        });
+        spawn_locations
+            .iter()
+            .for_each(|pt| match pt.preferred_entity {
+                Some(preferred_entity_type) => {
+                    let filtered_entities = &available_entities
+                        .clone()
+                        .into_iter()
+                        .filter(|template| template.entity_type == preferred_entity_type)
+                        .collect::<Vec<&Template>>();
+
+                    if let Some(entity) = rng.random_slice_entry(filtered_entities) {
+                        self.spawner.spawn_entity(pt, entity, &mut commands);
+                    }
+                }
+                None => {
+                    if let Some(entity) = rng.random_slice_entry(&available_entities) {
+                        self.spawner.spawn_entity(pt, entity, &mut commands);
+                    }
+                }
+            });
         commands.flush(ecs);
     }
 }
@@ -224,13 +238,39 @@ pub mod test {
                 base_damage: None,
             },
         ];
-        mock_loader.expect_load_entities().returning(move || entities.clone());
-        mock_spawner.expect_spawn_entity().with(predicate::always(), predicate::always(), predicate::always())
+        mock_loader
+            .expect_load_entities()
+            .returning(move || entities.clone());
+        mock_spawner
+            .expect_spawn_entity()
+            .with(
+                predicate::always(),
+                predicate::always(),
+                predicate::always(),
+            )
             .returning(|_, _, _| ())
             .times(3);
         let templates = TemplateSpawner::new(&mock_loader, mock_spawner);
         let mut world = World::default();
         let mut rng = RandomNumberGenerator::new();
-        templates.spawn_entities(&mut world, &mut rng, 0, &[Point::new(1, 1), Point::new(2,2), Point::new(3,3)]);
+        templates.spawn_entities(
+            &mut world,
+            &mut rng,
+            0,
+            &[
+                SpawnLocation {
+                    point: Point::new(1, 1),
+                    preferred_entity: None,
+                },
+                SpawnLocation {
+                    point: Point::new(2, 2),
+                    preferred_entity: None,
+                },
+                SpawnLocation {
+                    point: Point::new(3, 3),
+                    preferred_entity: None,
+                },
+            ],
+        );
     }
 }

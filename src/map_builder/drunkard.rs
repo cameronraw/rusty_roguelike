@@ -8,11 +8,11 @@ const DESIRED_FLOOR: usize = NUM_TILES / 3;
 pub struct DrunkardsWalkArchitect {}
 
 impl MapArchitect for DrunkardsWalkArchitect {
-    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
+    fn create_map_builder(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         let mut mb = MapBuilder {
             map: Map::new(),
             rooms: Vec::new(),
-            monster_spawns: Vec::new(),
+            spawn_locations: Vec::new(),
             player_start: Point::zero(),
             amulet_start: Point::zero(),
             theme: DungeonTheme::new(),
@@ -50,7 +50,7 @@ impl MapArchitect for DrunkardsWalkArchitect {
                 .for_each(|(idx, _)| mb.map.tiles[idx] = TileType::Wall);
         }
 
-        mb.monster_spawns = mb.spawn_monsters(&center, rng);
+        mb.spawn_locations = mb.get_spawn_plan(&center, rng);
         mb.player_start = center;
         mb.amulet_start = mb.find_most_distant();
         mb

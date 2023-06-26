@@ -1,8 +1,8 @@
-mod template;
+pub mod template;
 
 use crate::{
     components::{Player, Render},
-    prelude::{AmuletOfYala, Damage, FieldOfView, Health, Item, Name},
+    prelude::{AmuletOfYala, Damage, FieldOfView, Health, Item, Name, SpawnLocation},
 };
 use bracket_lib::{
     random::RandomNumberGenerator,
@@ -16,7 +16,7 @@ pub fn spawn_level(
     ecs: &mut World,
     rng: &mut RandomNumberGenerator,
     level: usize,
-    spawn_points: &[Point],
+    spawn_points: &[SpawnLocation],
 ) {
     let spawner = Spawner::default();
     let file_reader = FileEntityLoader::new(String::from("resources/template.ron"));

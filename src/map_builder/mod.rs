@@ -5,7 +5,7 @@ mod prefab;
 mod rooms;
 mod themes;
 
-use crate::prelude::*;
+use crate::{prelude::*, spawner::template::EntityType};
 
 use self::{
     automata::CellularAutomataArchitect,
@@ -18,16 +18,21 @@ use self::{
 const NUM_ROOMS: usize = 20;
 
 trait MapArchitect {
-    fn new(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
+    fn create_map_builder(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
 }
 
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
-    pub monster_spawns: Vec<Point>,
+    pub spawn_locations: Vec<SpawnLocation>,
     pub player_start: Point,
     pub amulet_start: Point,
     pub theme: Box<dyn MapTheme>,
+}
+
+pub struct SpawnLocation {
+    pub point: Point,
+    pub preferred_entity: Option<EntityType>,
 }
 
 impl MapBuilder {
@@ -37,7 +42,7 @@ impl MapBuilder {
             1 => Box::new(RoomsArchitect {}),
             _ => Box::new(CellularAutomataArchitect {}),
         };
-        let mut mb = architect.new(rng);
+        let mut mb = architect.create_map_builder(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = match rng.range(0, 2) {
             0 => DungeonTheme::new(),
@@ -53,7 +58,7 @@ impl MapBuilder {
         let dijkstra_map = DijkstraMap::new(
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
-            &vec![self.map.point2d_to_index(self.player_start)],
+            &[self.map.point2d_to_index(self.player_start)],
             &self.map,
             1024.0,
         );
@@ -134,7 +139,7 @@ impl MapBuilder {
         }
     }
 
-    fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
+    fn get_spawn_plan(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<SpawnLocation> {
         const NUM_MONSTERS: usize = 50;
         let mut spawnable_tiles: Vec<Point> = self
             .map
@@ -152,7 +157,10 @@ impl MapBuilder {
         let mut spawns = Vec::new();
         for _ in 0..NUM_MONSTERS {
             let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
-            spawns.push(spawnable_tiles[target_index].clone());
+            spawns.push(SpawnLocation {
+                point: spawnable_tiles[target_index].clone(),
+                preferred_entity: None,
+            });
             spawnable_tiles.remove(target_index);
         }
         spawns
