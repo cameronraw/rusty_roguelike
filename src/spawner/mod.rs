@@ -10,7 +10,7 @@ use bracket_lib::{
 };
 use legion::World;
 
-use self::template::Templates;
+use self::template::{Spawner, Templates};
 
 pub fn spawn_level(
     ecs: &mut World,
@@ -18,7 +18,8 @@ pub fn spawn_level(
     level: usize,
     spawn_points: &[Point],
 ) {
-    let template = Templates::load();
+    let spawner = Spawner::default();
+    let template = Templates::load(spawner);
     template.spawn_entities(ecs, rng, level, spawn_points);
 }
 

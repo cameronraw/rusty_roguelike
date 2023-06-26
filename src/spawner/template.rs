@@ -24,41 +24,30 @@ pub enum EntityType {
 }
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct Templates {
+pub struct Templates<T>
+where
+    T: CanSpawnEntities,
+{
     pub entities: Vec<Template>,
+    #[serde(skip)]
+    pub spawner: T,
 }
 
-impl Templates {
-    pub fn load() -> Self {
-        let file = File::open("resources/template.ron").expect("Failed opening file");
-        from_reader(file).expect("Unable to load templates")
+impl<T: CanSpawnEntities + Default> Default for Templates<T> {
+    fn default() -> Self {
+        Self {
+            entities: Default::default(),
+            spawner: Default::default(),
+        }
     }
+}
 
-    pub fn spawn_entities(
-        &self,
-        ecs: &mut World,
-        rng: &mut RandomNumberGenerator,
-        level: usize,
-        spawn_points: &[Point],
-    ) {
-        let mut available_entities = Vec::new();
-        self.entities
-            .iter()
-            .filter(|e| e.levels.contains(&level))
-            .for_each(|t| {
-                for _ in 0..t.frequency {
-                    available_entities.push(t);
-                }
-            });
-        let mut commands = CommandBuffer::new(ecs);
-        spawn_points.iter().for_each(|pt| {
-            if let Some(entity) = rng.random_slice_entry(&available_entities) {
-                self.spawn_entity(pt, entity, &mut commands);
-            }
-        });
-        commands.flush(ecs);
-    }
+#[derive(Default)]
+pub struct Spawner {}
 
+impl Spawner {}
+
+impl CanSpawnEntities for Spawner {
     fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer) {
         let entity = commands.push((
             pt.clone(),
@@ -102,5 +91,43 @@ impl Templates {
                 commands.add_component(entity, Weapon {})
             }
         }
+    }
+}
+
+pub trait CanSpawnEntities {
+    fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer);
+}
+
+impl<T: CanSpawnEntities + Default> Templates<T> {
+    pub fn load(spawner: T) -> Self {
+        let file = File::open("resources/template.ron").expect("Failed opening file");
+        let mut templates: Templates<T> = from_reader(file).expect("Unable to load templates");
+        templates.spawner = spawner;
+        templates
+    }
+
+    pub fn spawn_entities(
+        &self,
+        ecs: &mut World,
+        rng: &mut RandomNumberGenerator,
+        level: usize,
+        spawn_points: &[Point],
+    ) {
+        let mut available_entities = Vec::new();
+        self.entities
+            .iter()
+            .filter(|e| e.levels.contains(&level))
+            .for_each(|t| {
+                for _ in 0..t.frequency {
+                    available_entities.push(t);
+                }
+            });
+        let mut commands = CommandBuffer::new(ecs);
+        spawn_points.iter().for_each(|pt| {
+            if let Some(entity) = rng.random_slice_entry(&available_entities) {
+                self.spawner.spawn_entity(pt, entity, &mut commands);
+            }
+        });
+        commands.flush(ecs);
     }
 }
