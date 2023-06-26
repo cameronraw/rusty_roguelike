@@ -154,7 +154,6 @@ where
         rng: &mut RandomNumberGenerator,
         level: usize,
         spawn_points: &[Point],
-        mut commands: CommandBuffer
     ) {
         let mut available_entities = Vec::new();
         self.entities
@@ -165,6 +164,7 @@ where
                     available_entities.push(t);
                 }
             });
+        let mut commands = CommandBuffer::new(ecs);
         spawn_points.iter().for_each(|pt| {
             if let Some(entity) = rng.random_slice_entry(&available_entities) {
                 self.spawner.spawn_entity(pt, entity, &mut commands);
@@ -231,7 +231,6 @@ pub mod test {
         let templates = TemplateSpawner::new(&mock_loader, mock_spawner);
         let mut world = World::default();
         let mut rng = RandomNumberGenerator::new();
-        let commands = CommandBuffer::new(&world);
-        templates.spawn_entities(&mut world, &mut rng, 0, &[Point::new(1, 1), Point::new(2,2), Point::new(3,3)], commands);
+        templates.spawn_entities(&mut world, &mut rng, 0, &[Point::new(1, 1), Point::new(2,2), Point::new(3,3)]);
     }
 }
