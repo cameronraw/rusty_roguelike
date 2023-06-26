@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::{rooms::RoomsArchitect, drunkard::DrunkardsWalkArchitect, automata::CellularAutomataArchitect};
+
 pub struct DungeonTheme {}
 
 impl DungeonTheme {
@@ -15,6 +17,10 @@ impl MapTheme for DungeonTheme {
             TileType::Wall => to_cp437('#'),
             TileType::Exit => to_cp437('>'),
         }
+    }
+
+    fn get_architect(&self) -> Box<dyn super::MapArchitect> {
+        Box::new(RoomsArchitect {})
     }
 }
 
@@ -32,6 +38,14 @@ impl MapTheme for ForestTheme {
             TileType::Floor => to_cp437(';'),
             TileType::Wall => to_cp437('"'),
             TileType::Exit => to_cp437('>'),
+        }
+    }
+
+    fn get_architect(&self) -> Box<dyn super::MapArchitect> {
+        let mut rng = RandomNumberGenerator::new();
+        match rng.range(0, 1) {
+            0 => Box::new(DrunkardsWalkArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {})
         }
     }
 }

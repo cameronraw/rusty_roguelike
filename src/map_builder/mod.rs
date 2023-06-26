@@ -8,16 +8,13 @@ mod themes;
 use crate::{prelude::*, spawner::template::EntityType};
 
 use self::{
-    automata::CellularAutomataArchitect,
-    drunkard::DrunkardsWalkArchitect,
     prefab::apply_prefab,
-    rooms::RoomsArchitect,
     themes::{DungeonTheme, ForestTheme},
 };
 
 const NUM_ROOMS: usize = 20;
 
-trait MapArchitect {
+pub trait MapArchitect {
     fn create_map_builder(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
 }
 
@@ -37,17 +34,14 @@ pub struct SpawnLocation {
 
 impl MapBuilder {
     pub fn new(rng: &mut RandomNumberGenerator) -> Self {
-        let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => Box::new(DrunkardsWalkArchitect {}),
-            1 => Box::new(RoomsArchitect {}),
-            _ => Box::new(CellularAutomataArchitect {}),
-        };
-        let mut mb = architect.create_map_builder(rng);
-        apply_prefab(&mut mb, rng);
-        mb.theme = match rng.range(0, 2) {
+        let theme = match rng.range(0, 2) {
             0 => DungeonTheme::new(),
             _ => ForestTheme::new(),
         };
+        let mut architect = theme.get_architect();
+        let mut mb = architect.create_map_builder(rng);
+        apply_prefab(&mut mb, rng);
+        mb.theme = theme;
         mb
     }
     fn fill(&mut self, tile: TileType) {
@@ -169,4 +163,5 @@ impl MapBuilder {
 
 pub trait MapTheme: Sync + Send {
     fn tile_to_render(&self, tile_type: TileType) -> FontCharType;
+    fn get_architect(&self) -> Box<dyn MapArchitect>;
 }
