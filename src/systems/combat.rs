@@ -49,6 +49,13 @@ pub fn combat(ecs: &mut SubWorld, commands: &mut CommandBuffer) {
             if health.current < 1 && !is_player {
                 commands.remove(*victim);
             }
+            if health.current > 0 && is_player {
+                commands.push(((), 
+                    ScreenEffects {
+                        effect: Some(ScreenEffectsEnum::TakeDamage)
+                    }
+                ));
+            }
         }
         commands.remove(*message);
     });

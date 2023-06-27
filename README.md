@@ -36,6 +36,6 @@ The hero's hometown is suffering from a plague of monsters. Welling up from the 
 - [x] Add multiple layers to the dungeon, the Amulet on the last one.
 - [x] Add varied weapons to the game.
 - [x] Move to a data-driven design for spawning enemies.
-- [ ] Consider some visual effects to make the combat more visceral.
+- [x] Consider some visual effects to make the combat more visceral.
 - [ ] Consider keeping score.
 

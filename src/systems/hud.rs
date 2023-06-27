@@ -6,6 +6,7 @@ use crate::prelude::*;
 #[read_component(Item)]
 #[read_component(Carried)]
 #[read_component(Name)]
+#[read_component(ScreenEffects)]
 pub fn hud(ecs: &SubWorld) {
     let mut health_query = <&Health>::query().filter(component::<Player>());
     let player_health = health_query.iter(ecs).nth(0).unwrap();
@@ -56,5 +57,23 @@ pub fn hud(ecs: &SubWorld) {
             ColorPair::new(YELLOW, BLACK),
         );
     }
+
+    let screen_effects = <&ScreenEffects>::query()
+        .iter(ecs).next();
+
+    if screen_effects.is_some() {
+        draw_batch.target(2);
+        draw_batch.fill_region(
+            Rect { x1: 0, x2: SCREEN_WIDTH * 2, y1: 0, y2: SCREEN_HEIGHT * 2 }, 
+            ColorPair { fg: RED.into(), bg: RED.into() },
+            to_cp437('-')
+        );
+        
+
+    }
+
+
+        
+    
     draw_batch.submit(10000).expect("Batch error");
 }

@@ -185,6 +185,14 @@ impl State {
         self.resources.insert(TurnState::AwaitingInput);
         self.resources.insert(map_builder.theme);
     }
+
+    fn clear_screen_effects(&mut self) {
+        let mut commands = CommandBuffer::new(&self.ecs);
+        <(Entity, &ScreenEffects)>::query().iter(&self.ecs).for_each(|se| {
+            commands.remove(*se.0);
+        });
+        commands.flush(&mut self.ecs);
+    }
 }
 
 impl GameState for State {
@@ -199,9 +207,10 @@ impl GameState for State {
         ctx.cls();
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
-            TurnState::AwaitingInput => self
-                .input_systems
-                .execute(&mut self.ecs, &mut self.resources),
+            TurnState::AwaitingInput => {
+                self.input_systems.execute(&mut self.ecs, &mut self.resources);
+                self.clear_screen_effects()
+            },
             TurnState::PlayerTurn => self
                 .player_systems
                 .execute(&mut self.ecs, &mut self.resources),
