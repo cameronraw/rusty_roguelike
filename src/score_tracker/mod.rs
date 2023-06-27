@@ -13,7 +13,8 @@ impl ScoreTracker {
         }
     }
     pub fn increase_score(&mut self, points: i32) {
-        self.score = points;
+        println!("Adding to score: {}", points);
+        self.score += points;
     }
     pub fn get_time_elapsed(&self) -> Result<(u64, u64), SystemTimeError>{
         match self.start_time.elapsed() {
@@ -24,5 +25,8 @@ impl ScoreTracker {
             },
             Err(err) => Err(err)
         }
+    }
+    pub fn get_final_score(&self) -> i32 {
+        self.score
     }
 }

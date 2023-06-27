@@ -109,6 +109,12 @@ impl State {
         );
         ctx.print_color_centered(7, GREEN, BLACK, "Press 1 to play again.");
 
+        {
+            let score_tracker = self.resources.get::<ScoreTracker>().expect("Failure to retrieve score tracker from resources");
+
+            ctx.print_color_centered(10, YELLOW, BLACK, format!("Your score: {}", score_tracker.get_final_score()));
+        }
+
         if let Some(VirtualKeyCode::Key1) = ctx.key {
             self.reset_game_state();
         }
@@ -123,10 +129,12 @@ impl State {
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
         spawn_level(&mut self.ecs, &mut rng, 0, &map_builder.spawn_locations);
+        let score_tracker = ScoreTracker::new();
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));
         self.resources.insert(TurnState::AwaitingInput);
         self.resources.insert(map_builder.theme);
+        self.resources.insert(score_tracker);
     }
 
     fn advance_level(&mut self) {
