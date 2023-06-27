@@ -42,14 +42,19 @@ pub fn hud(ecs: &SubWorld, #[resource] score_tracker: &ScoreTracker) {
         ColorPair::new(YELLOW, BLACK),
     );
 
-    if let Ok((minutes, seconds)) = score_tracker.get_time_elapsed() {
-        let seconds = seconds.checked_sub(minutes * 60).unwrap();
+    if let Ok((minutes_string, seconds_string)) = score_tracker.get_time_elapsed() {
         draw_batch.print_color_right(
             Point::new(SCREEN_WIDTH * 2, 2),
-            format!("Time: {}:{}", minutes.with_leading_zeros(), seconds.with_leading_zeros()),
+            format!("Time: {}:{}", minutes_string, seconds_string),
             ColorPair::new(YELLOW, BLACK),
         );
     }
+
+    draw_batch.print_color_right(
+        Point::new(SCREEN_WIDTH * 2, 3),
+        format!("Score: {}", score_tracker.get_current_score()),
+        ColorPair::new(YELLOW, BLACK),
+    );
 
     let mut item_query = <(&Item, &Name, &Carried)>::query();
     let mut y = 3;
@@ -83,15 +88,3 @@ pub fn hud(ecs: &SubWorld, #[resource] score_tracker: &ScoreTracker) {
     draw_batch.submit(10000).expect("Batch error");
 }
 
-trait WithLeadingZeros {
-    fn with_leading_zeros(&self) -> String;
-}
-
-impl WithLeadingZeros for u64 {
-    fn with_leading_zeros(&self) -> String {
-        if *self < 9 {
-            return format!("0{}", self);
-        }
-        self.to_string()
-    }
-}

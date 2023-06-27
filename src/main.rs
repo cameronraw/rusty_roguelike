@@ -112,7 +112,9 @@ impl State {
         {
             let score_tracker = self.resources.get::<ScoreTracker>().expect("Failure to retrieve score tracker from resources");
 
-            ctx.print_color_centered(10, YELLOW, BLACK, format!("Your score: {}", score_tracker.get_final_score()));
+            ctx.print_color_centered(10, YELLOW, BLACK, format!("Your score: {}", score_tracker.get_current_score()));
+            let (minutes, seconds) = score_tracker.get_time_elapsed().unwrap();
+            ctx.print_color_centered(10, YELLOW, BLACK, format!("Your time: {}:{}", minutes, seconds));
         }
 
         if let Some(VirtualKeyCode::Key1) = ctx.key {

@@ -13,20 +13,33 @@ impl ScoreTracker {
         }
     }
     pub fn increase_score(&mut self, points: i32) {
-        println!("Adding to score: {}", points);
-        self.score += points;
+        self.score += points * 10;
     }
-    pub fn get_time_elapsed(&self) -> Result<(u64, u64), SystemTimeError>{
+    pub fn get_time_elapsed(&self) -> Result<(String, String), SystemTimeError>{
         match self.start_time.elapsed() {
             Ok(duration) => {
                 let seconds = duration.as_secs();
                 let minutes = seconds / 60;
-                Ok((minutes, seconds))
+                let seconds = seconds - (minutes * 60);
+                Ok((minutes.with_leading_zeros(), seconds.with_leading_zeros()))
             },
             Err(err) => Err(err)
         }
     }
-    pub fn get_final_score(&self) -> i32 {
+    pub fn get_current_score(&self) -> i32 {
         self.score
+    }
+}
+
+pub trait WithLeadingZeros {
+    fn with_leading_zeros(&self) -> String;
+}
+
+impl WithLeadingZeros for u64 {
+    fn with_leading_zeros(&self) -> String {
+        if *self < 9 {
+            return format!("0{}", self);
+        }
+        self.to_string()
     }
 }
