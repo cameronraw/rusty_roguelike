@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bracket-lib = "~0.8.1"
+chrono = "0.4.26"
 legion = "=0.3.1"
 mockall = "0.11.4"
 ron = "0.8.0"

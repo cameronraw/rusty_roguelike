@@ -100,7 +100,7 @@ pub struct Weapon;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ScreenEffects {
-    pub effect: Option<ScreenEffectsEnum>
+    pub effect: ScreenEffectsEnum
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

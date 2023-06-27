@@ -5,6 +5,7 @@ mod map_builder;
 mod spawner;
 mod systems;
 mod turn_state;
+mod score_tracker;
 
 mod prelude {
     pub use bracket_lib::prelude::*;
@@ -27,6 +28,7 @@ use std::collections::HashSet;
 
 use legion::systems::CommandBuffer;
 use prelude::*;
+use score_tracker::ScoreTracker;
 use spawner::{spawn_amulet_of_yala, spawn_level};
 
 struct State {
@@ -43,6 +45,7 @@ impl State {
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
         let mut map_builder = MapBuilder::new(&mut rng);
+        let mut score_tracker = ScoreTracker::new();
         spawn_player(&mut ecs, map_builder.player_start);
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
@@ -51,6 +54,7 @@ impl State {
         resources.insert(Camera::new(map_builder.player_start));
         resources.insert(TurnState::AwaitingInput);
         resources.insert(map_builder.theme);
+        resources.insert(score_tracker);
         Self {
             ecs,
             resources,
@@ -125,10 +129,10 @@ impl State {
         self.resources.insert(map_builder.theme);
     }
 
-    fn advance_level(&mut self) -> () {
+    fn advance_level(&mut self) {
         let player_entity = *<Entity>::query()
             .filter(component::<Player>())
-            .iter(&mut self.ecs)
+            .iter(&self.ecs)
             .nth(0)
             .unwrap();
 
@@ -142,7 +146,7 @@ impl State {
                 entities_to_keep.insert(e);
             });
 
-        let mut cb = CommandBuffer::new(&mut self.ecs);
+        let mut cb = CommandBuffer::new(&self.ecs);
         for e in Entity::query().iter(&self.ecs) {
             if !entities_to_keep.contains(e) {
                 cb.remove(*e);

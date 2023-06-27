@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, score_tracker::ScoreTracker};
 
 #[system]
 #[read_component(Health)]
@@ -7,7 +7,8 @@ use crate::prelude::*;
 #[read_component(Carried)]
 #[read_component(Name)]
 #[read_component(ScreenEffects)]
-pub fn hud(ecs: &SubWorld) {
+#[read_component(ScoreTracker)]
+pub fn hud(ecs: &SubWorld, #[resource] score_tracker: &ScoreTracker) {
     let mut health_query = <&Health>::query().filter(component::<Player>());
     let player_health = health_query.iter(ecs).nth(0).unwrap();
 
@@ -41,6 +42,15 @@ pub fn hud(ecs: &SubWorld) {
         ColorPair::new(YELLOW, BLACK),
     );
 
+    if let Ok((minutes, seconds)) = score_tracker.get_time_elapsed() {
+        let seconds = seconds.checked_sub(minutes * 60).unwrap();
+        draw_batch.print_color_right(
+            Point::new(SCREEN_WIDTH * 2, 2),
+            format!("Time: {}:{}", minutes.with_leading_zeros(), seconds.with_leading_zeros()),
+            ColorPair::new(YELLOW, BLACK),
+        );
+    }
+
     let mut item_query = <(&Item, &Name, &Carried)>::query();
     let mut y = 3;
     item_query
@@ -68,12 +78,20 @@ pub fn hud(ecs: &SubWorld) {
             ColorPair { fg: RED.into(), bg: RED.into() },
             to_cp437('-')
         );
-        
-
     }
-
-
-        
     
     draw_batch.submit(10000).expect("Batch error");
+}
+
+trait WithLeadingZeros {
+    fn with_leading_zeros(&self) -> String;
+}
+
+impl WithLeadingZeros for u64 {
+    fn with_leading_zeros(&self) -> String {
+        if *self < 9 {
+            return format!("0{}", self);
+        }
+        self.to_string()
+    }
 }

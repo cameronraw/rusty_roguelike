@@ -1,6 +1,6 @@
 use legion::systems::CommandBuffer;
 
-use crate::prelude::*;
+use crate::{prelude::*, score_tracker::ScoreTracker};
 
 #[system]
 #[read_component(WantsToAttack)]
@@ -8,7 +8,7 @@ use crate::prelude::*;
 #[write_component(Health)]
 #[read_component(Damage)]
 #[read_component(Carried)]
-pub fn combat(ecs: &mut SubWorld, commands: &mut CommandBuffer) {
+pub fn combat(ecs: &mut SubWorld, #[resource] score_tracker: &mut ScoreTracker, commands: &mut CommandBuffer) {
     let mut attackers = <(Entity, &WantsToAttack)>::query();
     let victims: Vec<(Entity, Entity, Entity)> = attackers
         .iter(ecs)
@@ -48,11 +48,12 @@ pub fn combat(ecs: &mut SubWorld, commands: &mut CommandBuffer) {
             health.current -= final_damage;
             if health.current < 1 && !is_player {
                 commands.remove(*victim);
+                score_tracker.increase_score(health.max);
             }
             if health.current > 0 && is_player {
                 commands.push(((), 
                     ScreenEffects {
-                        effect: Some(ScreenEffectsEnum::TakeDamage)
+                        effect: ScreenEffectsEnum::TakeDamage
                     }
                 ));
             }
